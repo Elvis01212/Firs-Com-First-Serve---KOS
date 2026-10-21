@@ -1,0 +1,299 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ByteBite - Restaurant Order Management & KDS</title>
+    <!-- Tailwind CSS for a modern, professional UI -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+</head>
+<body class="bg-slate-900 text-slate-100 font-sans min-h-screen flex flex-col">
+
+    <!-- Top Navbar -->
+    <header class="bg-slate-800 border-b border-slate-700 px-6 py-4 flex justify-between items-center shadow-md">
+        <div class="flex items-center space-x-3">
+            <div class="bg-orange-500 text-slate-900 p-2 rounded-lg font-bold text-xl flex items-center justify-center w-10 h-10 shadow">
+                <i class="fa-solid fa-utensils"></i>
+            </div>
+            <div>
+                <h1 class="text-xl font-bold tracking-tight text-white">ByteBite KDS</h1>
+                <p class="text-xs text-slate-400">FIFO Queue Data Structure Simulator</p>
+            </div>
+        </div>
+        <div class="flex items-center space-x-4">
+            <div class="bg-slate-700/60 px-4 py-2 rounded-lg border border-slate-600 text-sm">
+                <span class="text-slate-400">Queue Length:</span> <span id="queue-count" class="font-bold text-orange-400">0</span> orders
+            </div>
+            <button onclick="openPresentationModal()" class="bg-indigo-600 hover:bg-indigo-500 text-white px-4 py-2 rounded-lg text-sm font-semibold transition shadow flex items-center space-x-2">
+                <i class="fa-solid fa-chalkboard-user"></i>
+                <span>Presentation Guide</span>
+            </button>
+        </div>
+    </header>
+
+    <!-- Main Workspace -->
+    <main class="flex-1 grid grid-cols-1 lg:grid-cols-12 gap-6 p-6 max-w-7xl mx-auto w-full">
+        
+        <!-- Left Column: POS Station (Enqueue) -->
+        <section class="lg:col-span-4 bg-slate-800 rounded-2xl border border-slate-700 p-6 shadow-xl flex flex-col justify-between">
+            <div>
+                <div class="flex items-center justify-between mb-4 border-b border-slate-700 pb-3">
+                    <h2 class="text-lg font-bold text-white flex items-center space-x-2">
+                        <i class="fa-solid fa-cash-register text-orange-400"></i>
+                        <span>POS Station (Enqueue)</span>
+                    </h2>
+                    <span class="text-xs bg-orange-500/20 text-orange-300 px-2 py-1 rounded font-medium">O(1) Push</span>
+                </div>
+                <p class="text-xs text-slate-400 mb-6">Simulate customer orders being placed. New orders are added to the rear of the FIFO queue.</p>
+
+                <form id="order-form" onsubmit="handleNewOrder(event)" class="space-y-4">
+                    <div>
+                        <label class="block text-xs font-semibold uppercase tracking-wider text-slate-300 mb-1">Customer Name</label>
+                        <input type="text" id="cust-name" required placeholder="e.g., Sarah Connor" 
+                            class="w-full bg-slate-900 border border-slate-700 rounded-lg px-4 py-2.5 text-sm text-white focus:outline-none focus:border-orange-500 transition">
+                    </div>
+
+                    <div>
+                        <label class="block text-xs font-semibold uppercase tracking-wider text-slate-300 mb-1">Select Menu Item</label>
+                        <select id="menu-item" class="w-full bg-slate-900 border border-slate-700 rounded-lg px-4 py-2.5 text-sm text-white focus:outline-none focus:border-orange-500 transition">
+                            <option value="Classic Cheeseburger & Fries">Classic Cheeseburger & Fries</option>
+                            <option value="Truffle Mushroom Pizza">Truffle Mushroom Pizza</option>
+                            <option value="Spicy Crispy Chicken Burger">Spicy Crispy Chicken Burger</option>
+                            <option value="Loaded BBQ Bacon Fries">Loaded BBQ Bacon Fries</option>
+                            <option value="Avocado Veggie Wrap">Avocado Veggie Wrap</option>
+                        </select>
+                    </div>
+
+                    <div>
+                        <label class="block text-xs font-semibold uppercase tracking-wider text-slate-300 mb-1">Special Instructions / Notes</label>
+                        <input type="text" id="cust-notes" placeholder="e.g., No onions, extra crispy" 
+                            class="w-full bg-slate-900 border border-slate-700 rounded-lg px-4 py-2.5 text-sm text-white focus:outline-none focus:border-orange-500 transition">
+                    </div>
+
+                    <button type="submit" class="w-full bg-orange-500 hover:bg-orange-600 text-slate-950 font-bold py-3 rounded-lg transition shadow-lg flex items-center justify-center space-x-2">
+                        <i class="fa-solid fa-plus-circle"></i>
+                        <span>Place Order (Enqueue)</span>
+                    </button>
+                </form>
+            </div>
+
+            <!-- Quick Demo Button -->
+            <div class="mt-6 pt-4 border-t border-slate-700">
+                <button onclick="loadSampleOrders()" class="w-full bg-slate-700 hover:bg-slate-600 text-slate-200 text-xs font-semibold py-2.5 rounded-lg transition">
+                    <i class="fa-solid fa-bolt mr-1.5 text-yellow-400"></i> Load Demo Orders
+                </button>
+            </div>
+        </section>
+
+        <!-- Right Column: Kitchen Display System (KDS Queue View) -->
+        <section class="lg:col-span-8 bg-slate-800 rounded-2xl border border-slate-700 p-6 shadow-xl flex flex-col">
+            <div class="flex items-center justify-between mb-4 border-b border-slate-700 pb-3">
+                <h2 class="text-lg font-bold text-white flex items-center space-x-2">
+                    <i class="fa-solid fa-display text-emerald-400"></i>
+                    <span>Kitchen Display System (KDS) - FIFO Queue</span>
+                </h2>
+                <span class="text-xs bg-emerald-500/20 text-emerald-300 px-2 py-1 rounded font-medium">Front-to-Back Processing</span>
+            </div>
+            
+            <div class="flex justify-between items-center mb-4 text-xs text-slate-400">
+                <span>Orders are cooked strictly in the order they arrived (First-In, First-Out).</span>
+                <button onclick="bumpNextOrder()" id="bump-btn" class="bg-emerald-600 hover:bg-emerald-500 text-white px-4 py-2 rounded-lg font-bold transition shadow flex items-center space-x-1.5 disabled:opacity-50 disabled:cursor-not-allowed">
+                    <i class="fa-solid fa-check-double"></i>
+                    <span>Bump Next Order (Dequeue)</span>
+                </button>
+            </div>
+
+            <!-- Queue Container Grid -->
+            <div id="queue-container" class="flex-1 grid grid-cols-1 md:grid-cols-2 gap-4 overflow-y-auto max-h-[500px] pr-2">
+                <!-- Empty state placeholder -->
+                <div id="empty-state" class="col-span-2 flex flex-col items-center justify-center py-16 text-slate-500">
+                    <i class="fa-solid fa-mug-hot text-5xl mb-3 text-slate-600"></i>
+                    <p class="text-sm font-medium">No pending orders in the queue.</p>
+                    <p class="text-xs text-slate-600 mt-1">Place an order from the POS station or load sample data.</p>
+                </div>
+            </div>
+        </section>
+    </main>
+
+    <!-- Presentation Guide Modal -->
+    <div id="presentation-modal" class="fixed inset-0 bg-black/70 backdrop-blur-sm hidden items-center justify-center p-4 z-50">
+        <div class="bg-slate-800 border border-slate-700 rounded-2xl max-w-2xl w-full p-6 shadow-2xl relative max-h-[90vh] overflow-y-auto">
+            <button onclick="closePresentationModal()" class="absolute top-4 right-4 text-slate-400 hover:text-white text-lg">
+                <i class="fa-solid fa-xmark"></i>
+            </button>
+            
+            <h3 class="text-xl font-bold text-white mb-2 flex items-center space-x-2">
+                <i class="fa-solid fa-graduation-cap text-indigo-400"></i>
+                <span>Professor Presentation Guide & Script</span>
+            </h3>
+            <p class="text-xs text-slate-400 mb-6">Use this structured script to present your project and guarantee top grades.</p>
+
+            <div class="space-y-4 text-sm text-slate-300">
+                <div class="bg-slate-900/60 p-4 rounded-xl border border-slate-700">
+                    <h4 class="font-bold text-orange-400 mb-1">Slide 1: Problem & Data Structure Choice</h4>
+                    <p class="italic text-slate-300">"In high-volume restaurants, fairness and timing are everything. If orders are processed randomly, customer wait times become unpredictable and food gets cold. To solve this, we implemented a **FIFO (First-In, First-Out) Queue** data structure."</p>
+                </div>
+
+                <div class="bg-slate-900/60 p-4 rounded-xl border border-slate-700">
+                    <h4 class="font-bold text-orange-400 mb-1">Slide 2: Architectural Flow ($O(1)$ Complexity)</h4>
+                    <p class="italic text-slate-300">"The system features two main touchpoints: the **POS Station** which enqueues incoming tickets at the rear in constant time $O(1)$, and the **Kitchen Display System (KDS)** which dequeues orders from the front as chefs complete them."</p>
+                </div>
+
+                <div class="bg-slate-900/60 p-4 rounded-xl border border-slate-700">
+                    <h4 class="font-bold text-orange-400 mb-1">Slide 3: Live Demonstration</h4>
+                    <p class="italic text-slate-300">"Let's observe the live app: when I click 'Place Order', it joins the back of the line. Notice how the front order stays locked as the primary task. When the chef clicks 'Bump Order', it safely dequeues the oldest ticket, maintaining complete operational order."</p>
+                </div>
+            </div>
+
+            <div class="mt-6 pt-4 border-t border-slate-700 flex justify-end">
+                <button onclick="closePresentationModal()" class="bg-indigo-600 hover:bg-indigo-500 text-white px-5 py-2 rounded-lg text-sm font-semibold transition">
+                    Got it, Let's Present!
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- JavaScript Queue Implementation & Logic -->
+    <script>
+        // Queue Data Structure Class
+        class OrderQueue {
+            constructor() {
+                this.items = [];
+                this.nextId = 101;
+            }
+
+            enqueue(customerName, menuItem, notes) {
+                const order = {
+                    id: this.nextId++,
+                    customerName,
+                    menuItem,
+                    notes: notes || 'None',
+                    timestamp: new Date()
+                };
+                this.items.push(order);
+                return order;
+            }
+
+            dequeue() {
+                if (this.isEmpty()) return null;
+                return this.items.shift();
+            }
+
+            peek() {
+                if (this.isEmpty()) return null;
+                return this.items[0];
+            }
+
+            isEmpty() {
+                return this.items.length === 0;
+            }
+
+            size() {
+                return this.items.length;
+            }
+
+            toArray() {
+                return [...this.items];
+            }
+        }
+
+        // Initialize Queue instance
+        const kitchenQueue = new OrderQueue();
+
+        // UI Handlers
+        function handleNewOrder(event) {
+            event.preventDefault();
+            const name = document.getElementById('cust-name').value.trim();
+            const item = document.getElementById('menu-item').value;
+            const notes = document.getElementById('cust-notes').value.trim();
+
+            kitchenQueue.enqueue(name, item, notes);
+            
+            // Reset form
+            document.getElementById('order-form').reset();
+            renderQueue();
+        }
+
+        function bumpNextOrder() {
+            if (kitchenQueue.isEmpty()) return;
+            kitchenQueue.dequeue();
+            renderQueue();
+        }
+
+        function loadSampleOrders() {
+            kitchenQueue.enqueue("Alice Smith", "Classic Cheeseburger & Fries", "No pickles");
+            kitchenQueue.enqueue("Bob Johnson", "Truffle Mushroom Pizza", "Extra cheese");
+            kitchenQueue.enqueue("Charlie Davis", "Spicy Crispy Chicken Burger", "Well done fries");
+            renderQueue();
+        }
+
+        function renderQueue() {
+            const container = document.getElementById('queue-container');
+            const countBadge = document.getElementById('queue-count');
+            const bumpBtn = document.getElementById('bump-btn');
+
+            countBadge.textContent = kitchenQueue.size();
+            bumpBtn.disabled = kitchenQueue.isEmpty();
+
+            const orders = kitchenQueue.toArray();
+
+            if (orders.length === 0) {
+                container.innerHTML = `
+                    <div id="empty-state" class="col-span-2 flex flex-col items-center justify-center py-16 text-slate-500">
+                        <i class="fa-solid fa-mug-hot text-5xl mb-3 text-slate-600"></i>
+                        <p class="text-sm font-medium">No pending orders in the queue.</p>
+                        <p class="text-xs text-slate-600 mt-1">Place an order from the POS station or load sample data.</p>
+                    </div>
+                `;
+                return;
+            }
+
+            container.innerHTML = '';
+            orders.forEach((order, index) => {
+                const isFirst = index === 0;
+                const timeAgo = Math.floor((new Date() - order.timestamp) / 1000); // seconds elapsed
+
+                const card = document.createElement('div');
+                card.className = `p-4 rounded-xl border transition-all ${
+                    isFirst 
+                        ? 'bg-slate-800/90 border-orange-500/80 shadow-lg ring-1 ring-orange-500/50' 
+                        : 'bg-slate-900/65 border-slate-700/80 opacity-9opath'
+                }`;
+
+                card.innerHTML = `
+                    <div class="flex justify-between items-start mb-2">
+                        <div>
+                            <span class="text-xs font-bold px-2 py-0.5 rounded ${isFirst ? 'bg-orange-500 text-slate-950' : 'bg-slate-700 text-slate-300'}">
+                                ${isFirst ? '🔥 NEXT UP (Front)' : `Position #${index + 1}`}
+                            </span>
+                            <span class="text-xs text-slate-400 ml-2">Ticket #${order.id}</span>
+                        </div>
+                        <span class="text-xs text-slate-400"><i class="fa-regular fa-clock mr-1"></i>${timeAgo}s ago</span>
+                    </div>
+                    <h3 class="font-bold text-white text-base mb-1">${order.customerName}</h3>
+                    <p class="text-sm text-orange-300 font-medium mb-2"><i class="fa-solid fa-utensils mr-1.5 text-xs"></i>${order.menuItem}</p>
+                    <div class="bg-slate-800/80 px-3 py-1.5 rounded text-xs text-slate-400 border border-slate-700/50">
+                        <strong class="text-slate-300">Note:</strong> ${order.notes}
+                    </div>
+                `;
+                container.appendChild(card);
+            });
+        }
+
+        // Modal Controls
+        function openPresentationModal() {
+            document.getElementById('presentation-modal').classList.remove('hidden');
+            document.getElementById('presentation-modal').classList.add('flex');
+        }
+
+        function closePresentationModal() {
+            document.getElementById('presentation-modal').classList.remove('flex');
+            document.getElementById('presentation-modal').classList.add('hidden');
+        }
+
+        // Initial render
+        renderQueue();
+    </script>
+</body>
+</html>
